@@ -1,0 +1,30 @@
+{
+  "filesystem": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "/home/feng/easy_ai"
+    ]
+  },
+  "git": {
+    "command": "uvx",
+    "args": [
+      "mcp-server-git",
+      "--repository",
+      "/home/feng/easy_ai"
+    ]
+  },
+  "fetch": {
+    "command": "uvx",
+    "args": [
+      "mcp-server-fetch"
+    ]
+  },
+  "time": {
+    "command": "uvx",
+    "args": [
+      "mcp-server-time"
+    ]
+  }
+}

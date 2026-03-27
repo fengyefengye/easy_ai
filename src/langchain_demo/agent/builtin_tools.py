@@ -22,6 +22,7 @@ _UNARY_OPS: dict[type[ast.unaryop], Any] = {
 
 
 def _eval_expr(node: ast.AST) -> float:
+    """递归计算 AST 表达式节点，仅允许安全算术运算。"""
     if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
         return float(node.value)
     if isinstance(node, ast.BinOp):
@@ -57,4 +58,5 @@ def current_time() -> str:
 
 
 def get_builtin_tools() -> list[BaseTool]:
+    """返回内置工具列表。"""
     return [calculator, current_time]

@@ -7,6 +7,7 @@ from langchain_openai import ChatOpenAI
 
 
 def build_qa_chain(model: ChatOpenAI) -> Runnable[dict[str, str], str]:
+    """构建“提示词 + 模型 + 字符串解析”的问答链。"""
     prompt = ChatPromptTemplate.from_messages(
         [
             (

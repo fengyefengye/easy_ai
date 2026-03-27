@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 
 from langchain_demo import run, run_agent
 
 
 def parse_args() -> argparse.Namespace:
+    """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="LangChain layered architecture demo")
     parser.add_argument("question", type=str, help="Question for the LLM")
     parser.add_argument(
@@ -18,18 +20,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--enable-mcp",
         action="store_true",
-        help="在agent模式下启用MCP工具加载（来自MCP_SERVERS_JSON）",
+        help="在agent模式下启用MCP工具加载（来自src/langchain_demo/config/mcp_servers.json）",
     )
     return parser.parse_args()
 
 
 def main() -> None:
+    """程序入口：执行指定模式并输出结构化结果。"""
     args = parse_args()
     if args.mode == "qa":
-        answer = run(args.question)
+        response = run(args.question)
     else:
-        answer = asyncio.run(run_agent(args.question, enable_mcp=args.enable_mcp))
-    print(answer)
+        response = asyncio.run(run_agent(args.question, enable_mcp=args.enable_mcp))
+    print(json.dumps(response.to_dict(), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
