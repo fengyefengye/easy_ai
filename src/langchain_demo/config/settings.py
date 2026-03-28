@@ -48,7 +48,7 @@ def load_settings() -> AppSettings:
     if not api_key:
         raise ValueError("OPENAI_API_KEY is required")
 
-    base_url = os.getenv("OPENAI_BASE_URL", "https://chatapi.zjt66.top/v1").strip()
+    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").strip()
     model = os.getenv("LLM_MODEL", "gpt-4o-mini").strip()
     temperature_raw = os.getenv("LLM_TEMPERATURE", "0.2").strip()
     temperature = float(temperature_raw)

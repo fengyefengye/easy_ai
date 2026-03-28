@@ -84,6 +84,17 @@ MCP 工具改为读取本地配置文件（默认路径：`src/langchain_demo/co
 
 并且代码会对 MCP 工具做“只读过滤”，会拦截名字里含 `write/edit/create/update/delete/remove/commit/push...` 的工具。
 
+MCP 运行前建议确认（尤其在 WSL）：
+```bash
+which uvx
+uvx --version
+```
+
+如果没有 `uvx`：
+```bash
+python -m pip install uv
+```
+
 ### 3) 运行
 
 基础 QA 模式（不走工具）：
@@ -99,4 +110,80 @@ python src/main.py "现在UTC时间是多少"
 Agent + MCP 模式（会读取 `src/langchain_demo/config/mcp_servers.json`）：
 ```bash
 python src/main.py "帮我查一下今天的天气" --mode agent --enable-mcp
+```
+
+## 更多样例
+
+### 样例 1：QA 模式
+```bash
+python src/main.py "请用三条总结MCP是什么" --mode qa
+```
+
+预期特征：
+- `tool_calls` 为空
+- `workflow.conversation` 只有 `ai_output`
+
+### 样例 2：Agent 调用内置时间工具
+```bash
+python src/main.py "现在UTC时间是多少"
+```
+
+预期特征：
+- `tool_calls` 包含 `current_time`
+- `workflow.conversation` 顺序通常是：
+  - `ai_tool_call`
+  - `tool_output`
+  - `ai_output`
+
+### 样例 3：Agent 调用计算器工具
+```bash
+python src/main.py "计算 pi*100，并保留两位小数"
+```
+
+预期特征：
+- `tool_calls` 包含 `calculator`
+- `tool_calls[0].args` 中通常能看到表达式参数
+
+### 样例 4：一次问题触发多个工具
+```bash
+python src/main.py "现在UTC时间是多少，并计算 12345*678"
+```
+
+预期特征：
+- `tool_calls` 里可能同时出现 `current_time` 与 `calculator`
+- `workflow.conversation` 会出现多组 `ai_tool_call -> tool_output`
+
+### 样例 5：启用 MCP（只读工具）
+```bash
+python src/main.py "读取README.md前10行并告诉我项目是做什么的" --mode agent --enable-mcp
+```
+
+预期特征：
+- `workflow.agent_init.tools` 会比未启用 MCP 时更多
+- 若模型选择 MCP 工具，会在 `tool_calls` 里看到对应工具名
+
+### 样例 6：检查当前加载了哪些工具
+```bash
+python src/main.py "请先告诉我你当前可用的工具名，再回答1+1等于几"
+```
+
+预期特征：
+- `workflow.agent_init.tools` 展示完整工具列表
+- `conversation` 中仍可看到实际工具调用轨迹
+
+### 样例 7：不兼容网关时的错误输出
+当 `OPENAI_BASE_URL` 不兼容工具调用协议时，会返回结构化错误，而不是直接崩溃：
+
+```json
+{
+  "answer": "模型调用失败。请检查 OPENAI_BASE_URL 是否兼容 OpenAI Chat Completions 工具调用协议，原始错误: ...",
+  "workflow": {
+    "error": "..."
+  }
+}
+```
+
+建议优先使用：
+```env
+OPENAI_BASE_URL=https://api.openai.com/v1
 ```

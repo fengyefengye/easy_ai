@@ -22,11 +22,21 @@ async def run_agent(question: str, enable_mcp: bool) -> ChatResponse:
     settings = load_settings()
     model = create_chat_model(settings)
     tools = get_builtin_tools()
+    mcp_warning: str | None = None
     if enable_mcp:
-        tools.extend(await load_mcp_tools(settings.mcp_servers_file))
+        try:
+            tools.extend(await load_mcp_tools(settings.mcp_servers_file))
+        except Exception as exc:
+            mcp_warning = (
+                "MCP 工具加载失败，已降级为仅使用内置工具。"
+                f" 原始错误: {exc}"
+            )
     agent_service = AgentService(
         model=model,
         tools=tools,
         system_prompt=settings.agent_system_prompt,
     )
-    return agent_service.ask(question)
+    response = await agent_service.ask(question)
+    if mcp_warning is not None:
+        response.workflow["mcp_warning"] = mcp_warning
+    return response

@@ -1,6 +1,10 @@
 {
   "filesystem": {
+    "transport": "stdio",
     "command": "npx",
+    "env": {
+      "npm_config_cache": "/tmp/npm-cache"
+    },
     "args": [
       "-y",
       "@modelcontextprotocol/server-filesystem",
@@ -8,7 +12,13 @@
     ]
   },
   "git": {
+    "transport": "stdio",
     "command": "uvx",
+    "env": {
+      "UV_CACHE_DIR": "/tmp/uv-cache",
+      "UV_TOOL_DIR": "/tmp/uv-tools",
+      "XDG_DATA_HOME": "/tmp"
+    },
     "args": [
       "mcp-server-git",
       "--repository",
@@ -16,13 +26,25 @@
     ]
   },
   "fetch": {
+    "transport": "stdio",
     "command": "uvx",
+    "env": {
+      "UV_CACHE_DIR": "/tmp/uv-cache",
+      "UV_TOOL_DIR": "/tmp/uv-tools",
+      "XDG_DATA_HOME": "/tmp"
+    },
     "args": [
       "mcp-server-fetch"
     ]
   },
   "time": {
+    "transport": "stdio",
     "command": "uvx",
+    "env": {
+      "UV_CACHE_DIR": "/tmp/uv-cache",
+      "UV_TOOL_DIR": "/tmp/uv-tools",
+      "XDG_DATA_HOME": "/tmp"
+    },
     "args": [
       "mcp-server-time"
     ]

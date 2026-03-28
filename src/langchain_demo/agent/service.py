@@ -57,10 +57,30 @@ class AgentService:
             system_prompt=system_prompt,
         )
 
-    def ask(self, question: str) -> ChatResponse:
+    async def ask(self, question: str) -> ChatResponse:
         """执行一次提问，并返回答案/中间输出/工具调用记录。"""
         invoke_messages = [{"role": "user", "content": question}]
-        response = self._agent.invoke({"messages": invoke_messages})
+        try:
+            response = await self._agent.ainvoke({"messages": invoke_messages})
+        except Exception as exc:
+            error_message = (
+                "模型调用失败。请检查 OPENAI_BASE_URL 是否兼容 OpenAI Chat Completions 工具调用协议，"
+                f"原始错误: {exc}"
+            )
+            return ChatResponse(
+                answer=error_message,
+                workflow={
+                    "agent_init": {
+                        "model": self._model_name,
+                        "system_prompt": self._system_prompt,
+                        "tools": self._tool_names,
+                    },
+                    "invoke_input_messages": invoke_messages,
+                    "conversation": [],
+                    "final_result": error_message,
+                    "error": str(exc),
+                },
+            )
         if not isinstance(response, dict):
             return ChatResponse(
                 answer=str(response),

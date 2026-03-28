@@ -68,6 +68,18 @@ async def load_mcp_tools(mcp_servers_file: str) -> list[BaseTool]:
     connections = _parse_mcp_servers(mcp_servers_file)
     if not connections:
         return []
-    client = MultiServerMCPClient(connections)
-    tools = await client.get_tools()
-    return _filter_read_only_tools(tools)
+    loaded_tools: list[BaseTool] = []
+    errors: list[str] = []
+    for server_name, connection in connections.items():
+        client = MultiServerMCPClient({server_name: connection})
+        try:
+            tools = await client.get_tools()
+        except Exception as exc:
+            errors.append(f"{server_name}: {exc}")
+            continue
+        loaded_tools.extend(tools)
+    if loaded_tools:
+        return _filter_read_only_tools(loaded_tools)
+    if errors:
+        raise ValueError("所有 MCP 服务加载失败: " + "; ".join(errors))
+    return []
